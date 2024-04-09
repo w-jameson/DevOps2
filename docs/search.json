@@ -1,0 +1,114 @@
+[
+  {
+    "objectID": "api.html",
+    "href": "api.html",
+    "title": "api",
+    "section": "",
+    "text": "import pins\nfrom vetiver import VetiverModel\nfrom vetiver import VetiverAPI\nimport vetiver\n\n\nb = pins.board_folder('data/model', allow_pickle_read=True)\nv = VetiverModel.from_pin(b, 'penguin_model')\n\n\n#Do not run again!!!\n#vetiver.prepare_docker(b, \"penguin_model\")\n\n\napp = VetiverAPI(v, check_prototype=True)\n\n\n #app.run(port = 8080)"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Jameson_DevOps_for_DataScience",
+    "section": "",
+    "text": "This is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "model.html",
+    "href": "model.html",
+    "title": "Model",
+    "section": "",
+    "text": "from palmerpenguins import penguins\nfrom pandas import get_dummies\nimport duckdb\nimport numpy as np\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.linear_model import Ridge\nfrom sklearn import linear_model\nfrom sklearn import preprocessing\nfrom sklearn.model_selection import train_test_split"
+  },
+  {
+    "objectID": "model.html#import-packages",
+    "href": "model.html#import-packages",
+    "title": "Model",
+    "section": "",
+    "text": "from palmerpenguins import penguins\nfrom pandas import get_dummies\nimport duckdb\nimport numpy as np\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.linear_model import Ridge\nfrom sklearn import linear_model\nfrom sklearn import preprocessing\nfrom sklearn.model_selection import train_test_split"
+  },
+  {
+    "objectID": "model.html#get-data",
+    "href": "model.html#get-data",
+    "title": "Model",
+    "section": "Get Data",
+    "text": "Get Data\n\n#con = duckdb.connect('my-db.duckdb')\n#df = penguins.load_penguins()\n#con.execute('CREATE TABLE penguins AS SELECT * FROM df')\n#con.close()\n\n\ncon = duckdb.connect('my-db.duckdb')\ndf = con.execute(\"SELECT * FROM penguins\").fetchdf().dropna()"
+  },
+  {
+    "objectID": "model.html#establish-predictors-and-traintest-split",
+    "href": "model.html#establish-predictors-and-traintest-split",
+    "title": "Model",
+    "section": "Establish Predictors and train/test split",
+    "text": "Establish Predictors and train/test split\n\nX = get_dummies(df[['bill_length_mm', 'species', 'sex']], drop_first = True)\ny = df['body_mass_g']\n\n\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)"
+  },
+  {
+    "objectID": "model.html#set-up-regression-models",
+    "href": "model.html#set-up-regression-models",
+    "title": "Model",
+    "section": "Set up Regression Models",
+    "text": "Set up Regression Models\n\n# Below Establishes the models that will be tested, \n#lin_reg = LinearRegression()\n#rf_reg = RandomForestRegressor(n_estimators=100, random_state=1)\n#ridge_reg = Ridge(alpha = 1.0)\n#lasso_reg = linear_model.Lasso(alpha = 0.1)"
+  },
+  {
+    "objectID": "model.html#model-training",
+    "href": "model.html#model-training",
+    "title": "Model",
+    "section": "Model Training",
+    "text": "Model Training\n\n#lin_reg.fit(X_train, y_train)\n#rf_reg.fit(X_train, y_train)\n#ridge_reg.fit(X_train, y_train)\n#lasso_reg.fit(X_train, y_train)"
+  },
+  {
+    "objectID": "model.html#make-predictions-using-models",
+    "href": "model.html#make-predictions-using-models",
+    "title": "Model",
+    "section": "Make Predictions Using Models",
+    "text": "Make Predictions Using Models\n\n#y_pred_lin = lin_reg.predict(X_test)\n#y_pred_rf = rf_reg.predict(X_test)\n#y_pred_ridge = ridge_reg.predict(X_test)\n#y_pred_lasso = lasso_reg.fit(X_test)"
+  },
+  {
+    "objectID": "model.html#comparing-model-rmse",
+    "href": "model.html#comparing-model-rmse",
+    "title": "Model",
+    "section": "Comparing Model RMSE",
+    "text": "Comparing Model RMSE\n\n#print(f\"R^2 {model.score(X,y)}\")\n#print(f\"Intercept {model.intercept_}\")\n#print(f\"Columns {X.columns}\")\n#print(f\"Coefficients {model.coef_}\")\n\n\n#rmse_lin = np.sqrt(mean_squared_error(y_test, y_pred_lin))\n#rmse_rf = np.sqrt(mean_squared_error(y_test, y_pred_rf))\n\n\n#print(f'Linear Regression RMSE: {rmse_lin}')\n#print(f'Random Forest Regression RMSE: {rmse_rf}')"
+  },
+  {
+    "objectID": "model.html#model-selection",
+    "href": "model.html#model-selection",
+    "title": "Model",
+    "section": "Model Selection",
+    "text": "Model Selection\n\nmodel = LinearRegression()\n\n# Step 2: Fit the model to the data\nmodel.fit(X, y)\n\nLinearRegression()In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.  LinearRegression?Documentation for LinearRegressioniFittedLinearRegression() \n\n\n\nmodel1 = \"best model\""
+  },
+  {
+    "objectID": "model.html#vetiver-model-and-pinning",
+    "href": "model.html#vetiver-model-and-pinning",
+    "title": "Model",
+    "section": "Vetiver Model and Pinning",
+    "text": "Vetiver Model and Pinning\n\nfrom vetiver import VetiverModel\nv = VetiverModel(model, model_name='penguin_model', prototype_data=X)\n\n\nfrom vetiver import VetiverAPI\napp = VetiverAPI(v, check_prototype=True)\n\n\nimport pins\nfrom vetiver import vetiver_pin_write\nboard = pins.board_folder(\"data/model\", allow_pickle_read = True)\nvetiver_pin_write(board, v)\n#board.pin_write(model, \"penguin_model\", type = \"joblib\")\n\nModel Cards provide a framework for transparent, responsible reporting. \n Use the vetiver `.qmd` Quarto template as a place to start, \n with vetiver.model_card()\nWriting pin:\nName: 'penguin_model'\nVersion: 20240409T153106Z-fdb5a"
+  },
+  {
+    "objectID": "model.html#running-the-site",
+    "href": "model.html#running-the-site",
+    "title": "Model",
+    "section": "Running the Site",
+    "text": "Running the Site\n\n#app.run(port = 8080)\n\n\n#import requests\n#req_data = {\n#  \"bill_length_mm\": 0,\n#  \"species_Chinstrap\": False,\n#  \"species_Gentoo\": False,\n#  \"sex_male\": False\n#}\n\n\n#req = requests.post('http://127.0.0.1:8080/handler_predict', json = [req_data], timeout = 10)\n\n\n\n\n#res = req.json().get('predict')[0]"
+  },
+  {
+    "objectID": "model.html#close-database",
+    "href": "model.html#close-database",
+    "title": "Model",
+    "section": "Close Database",
+    "text": "Close Database\n\ncon.close()"
+  },
+  {
+    "objectID": "eda.html",
+    "href": "eda.html",
+    "title": "Penguins EDA",
+    "section": "",
+    "text": "## Penguin Size and Mass by Sex and Species\n\nlibrary(palmerpenguins)\nlibrary(dplyr)\nlibrary(ggplot2)\nlibrary(dbplyr)\nlibrary(DBI)\nlibrary(duckdb)\n\n\n\n\n#con &lt;- DBI::dbConnect(duckdb::duckdb(), dbdir = \"my-db.duckdb\")\n#DBI::dbWriteTable(con, \"penguins\", palmerpenguins::penguins)\n#DBI::dbDisconnect(con)\n\n\n\n\n\ncon &lt;- DBI::dbConnect(\n  duckdb::duckdb(), \n  dbdir = \"my-db.duckdb\"\n  )\ndf &lt;- dplyr::tbl(con, \"penguins\")\n\n\ndf %&gt;%\n  group_by(species, sex) %&gt;%\n  summarise(\n    across(\n        ends_with(\"mm\") | ends_with(\"g\"),\n      \\(x) mean(x, na.rm = TRUE)\n      ),.groups = \"drop\"\n    ) %&gt;%\n  dplyr::collect() %&gt;%\n  knitr::kable()\n\n\n\n\n\n\n\n\n\n\n\n\nspecies\nsex\nbill_length_mm\nbill_depth_mm\nflipper_length_mm\nbody_mass_g\n\n\n\n\nAdelie\nNA\n37.84000\n18.32000\n185.6000\n3540.000\n\n\nAdelie\nfemale\n37.25753\n17.62192\n187.7945\n3368.836\n\n\nAdelie\nmale\n40.39041\n19.07260\n192.4110\n4043.493\n\n\nChinstrap\nfemale\n46.57353\n17.58824\n191.7353\n3527.206\n\n\nChinstrap\nmale\n51.09412\n19.25294\n199.9118\n3938.971\n\n\nGentoo\nNA\n45.62500\n14.55000\n215.7500\n4587.500\n\n\nGentoo\nfemale\n45.56379\n14.23793\n212.7069\n4679.741\n\n\nGentoo\nmale\n49.47377\n15.71803\n221.5410\n5484.836\n\n\n\n\n\n## Penguin Size vs Mass by Species\n\ndf %&gt;%\n  ggplot(aes(x = bill_length_mm, y = body_mass_g, color = species)) +\n  geom_point() + \n  geom_smooth(method = \"lm\")\n\n`geom_smooth()` using formula = 'y ~ x'\n\n\nWarning: Removed 2 rows containing non-finite outside the scale range\n(`stat_smooth()`).\n\n\nWarning: Removed 2 rows containing missing values or values outside the scale range\n(`geom_point()`).\n\n\n\n\n\n\n\n\n\n\nDBI::dbDisconnect(con, shutdown = T)"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site\n\n1 + 1\n\n[1] 2"
+  }
+]
