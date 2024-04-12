@@ -1,0 +1,9 @@
+api_version: 1
+created: 20240310T125146Z
+description: null
+file: penguin_model.joblib
+file_size: 990
+pin_hash: fdb5a036f2138963
+title: 'penguin_model: a pinned LinearRegression object'
+type: joblib
+user: {}

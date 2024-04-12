@@ -1,0 +1,157 @@
+---
+title: "Model"
+---
+
+## Import Packages
+
+```{python .cell-code}
+from palmerpenguins import penguins
+from pandas import get_dummies
+import duckdb
+import numpy as np
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import Ridge
+from sklearn import linear_model
+from sklearn import preprocessing
+from sklearn.model_selection import train_test_split
+```
+
+## Get Data
+
+```{python}
+#con = duckdb.connect('my-db.duckdb')
+#df = penguins.load_penguins()
+#con.execute('CREATE TABLE penguins AS SELECT * FROM df')
+#con.close()
+```
+
+```{python}
+con = duckdb.connect('my-db.duckdb')
+df = con.execute("SELECT * FROM penguins").fetchdf().dropna()
+```
+
+## Establish Predictors and train/test split
+
+```{python}
+X = get_dummies(df[['bill_length_mm', 'species', 'sex']], drop_first = True)
+y = df['body_mass_g']
+
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
+```
+
+## Set up Regression Models
+
+```{python}
+# Below Establishes the models that will be tested, 
+#lin_reg = LinearRegression()
+#rf_reg = RandomForestRegressor(n_estimators=100, random_state=1)
+#ridge_reg = Ridge(alpha = 1.0)
+#lasso_reg = linear_model.Lasso(alpha = 0.1)
+```
+
+## Model Training
+
+```{python}
+#lin_reg.fit(X_train, y_train)
+#rf_reg.fit(X_train, y_train)
+#ridge_reg.fit(X_train, y_train)
+#lasso_reg.fit(X_train, y_train)
+```
+
+## Make Predictions Using Models
+
+```{python}
+#y_pred_lin = lin_reg.predict(X_test)
+#y_pred_rf = rf_reg.predict(X_test)
+#y_pred_ridge = ridge_reg.predict(X_test)
+#y_pred_lasso = lasso_reg.fit(X_test)
+```
+
+## Comparing Model RMSE
+
+```{python}
+#print(f"R^2 {model.score(X,y)}")
+#print(f"Intercept {model.intercept_}")
+#print(f"Columns {X.columns}")
+#print(f"Coefficients {model.coef_}")
+```
+
+```{python}
+#rmse_lin = np.sqrt(mean_squared_error(y_test, y_pred_lin))
+#rmse_rf = np.sqrt(mean_squared_error(y_test, y_pred_rf))
+```
+
+```{python}
+#print(f'Linear Regression RMSE: {rmse_lin}')
+#print(f'Random Forest Regression RMSE: {rmse_rf}')
+```
+
+## Model Selection
+
+```{python}
+model = LinearRegression()
+
+# Step 2: Fit the model to the data
+model.fit(X, y)
+```
+
+```{python}
+model1 = "best model"
+```
+
+\
+\
+
+## Vetiver Model and Pinning
+
+```{python}
+from vetiver import VetiverModel
+v = VetiverModel(model, model_name='penguin_model', prototype_data=X)
+```
+
+```{python}
+from vetiver import VetiverAPI
+app = VetiverAPI(v, check_prototype=True)
+```
+
+```{python}
+import pins
+from vetiver import vetiver_pin_write
+board = pins.board_folder("data/model", allow_pickle_read = True)
+vetiver_pin_write(board, v)
+#board.pin_write(model, "penguin_model", type = "joblib")
+```
+
+## Running the Site
+
+```{python}
+#app.run(port = 8080)
+```
+
+```{python}
+#import requests
+#req_data = {
+#  "bill_length_mm": 0,
+#  "species_Chinstrap": False,
+#  "species_Gentoo": False,
+#  "sex_male": False
+#}
+```
+
+```{python}
+#req = requests.post('http://127.0.0.1:8080/handler_predict', json = [req_data], timeout = 10)
+```
+
+\
+
+```{python}
+#res = req.json().get('predict')[0]
+```
+
+## Close Database
+
+```{python}
+con.close()
+```

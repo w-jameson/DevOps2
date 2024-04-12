@@ -1,0 +1,28 @@
+---
+title: "api"
+---
+
+```{python}
+import pins
+from vetiver import VetiverModel
+from vetiver import VetiverAPI
+import vetiver
+```
+
+```{python}
+b = pins.board_folder('data/model', allow_pickle_read=True)
+v = VetiverModel.from_pin(b, 'penguin_model')
+```
+
+```{python}
+#Do not run again!!!
+#vetiver.prepare_docker(b, "penguin_model")
+```
+
+```{python}
+app = VetiverAPI(v, check_prototype=True)
+```
+
+```{python}
+ #app.run(port = 8080)
+```
