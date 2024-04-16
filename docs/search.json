@@ -81,7 +81,7 @@
     "href": "model.html#vetiver-model-and-pinning",
     "title": "Model",
     "section": "Vetiver Model and Pinning",
-    "text": "Vetiver Model and Pinning\n\nfrom vetiver import VetiverModel\nv = VetiverModel(model, model_name='penguin_model', prototype_data=X)\n\n\nfrom vetiver import VetiverAPI\napp = VetiverAPI(v, check_prototype=True)\n\n\nimport pins\nfrom vetiver import vetiver_pin_write\nboard = pins.board_folder(\"data/model\", allow_pickle_read = True)\nvetiver_pin_write(board, v)\n#board.pin_write(model, \"penguin_model\", type = \"joblib\")\n\nModel Cards provide a framework for transparent, responsible reporting. \n Use the vetiver `.qmd` Quarto template as a place to start, \n with vetiver.model_card()\nWriting pin:\nName: 'penguin_model'\nVersion: 20240409T153106Z-fdb5a"
+    "text": "Vetiver Model and Pinning\n\nfrom vetiver import VetiverModel\nv = VetiverModel(model, model_name='penguin_model', prototype_data=X)\n\n\nfrom vetiver import VetiverAPI\napp = VetiverAPI(v, check_prototype=True)\n\n\nimport pins\nfrom vetiver import vetiver_pin_write\nboard = pins.board_folder(\"data/model\", allow_pickle_read = True)\nvetiver_pin_write(board, v)\n#board.pin_write(model, \"penguin_model\", type = \"joblib\")\n\nModel Cards provide a framework for transparent, responsible reporting. \n Use the vetiver `.qmd` Quarto template as a place to start, \n with vetiver.model_card()\nWriting pin:\nName: 'penguin_model'\nVersion: 20240416T154957Z-fdb5a"
   },
   {
     "objectID": "model.html#running-the-site",
