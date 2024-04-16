@@ -1,11 +1,10 @@
 ---
-title: "Jameson_DevOps_for_DataScience"
+title: "C3C William Jameson Math 378 Final Project"
+format:
+  html:
+    theme: darkly
 ---
 
-This is a Quarto website.
+## Overview
 
-To learn more about Quarto websites visit <https://quarto.org/docs/websites>.
-
-```{r}
-1 + 1
-```
+This project follows Alex K Gold's book DevOps for Data Science, found at [do4ds.com](https://do4ds.com/).
