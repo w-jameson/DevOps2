@@ -93,9 +93,16 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Jameson_DevOps_for_DataScience",
+    "title": "C3C William Jameson Math 378 Final Project",
     "section": "",
-    "text": "This is a Quarto website.\nTo learn more about Quarto websites visit https://quarto.org/docs/websites.\n\n1 + 1\n\n[1] 2"
+    "text": "This project follows Alex K Gold’s book DevOps for Data Science, found at do4ds.com."
+  },
+  {
+    "objectID": "index.html#overview",
+    "href": "index.html#overview",
+    "title": "C3C William Jameson Math 378 Final Project",
+    "section": "",
+    "text": "This project follows Alex K Gold’s book DevOps for Data Science, found at do4ds.com."
   },
   {
     "objectID": "api.html",
