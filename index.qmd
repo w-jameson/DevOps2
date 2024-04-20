@@ -1,10 +1,9 @@
 ---
 title: "C3C William Jameson Math 378 Final Project"
-format:
-  html:
-    theme: darkly
 ---
 
 ## Overview
 
 This project follows Alex K Gold's book DevOps for Data Science, found at [do4ds.com](https://do4ds.com/).
+
+Analysis was conducted on the Palmer's Penguins Dataset
