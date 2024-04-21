@@ -2,9 +2,7 @@
 title: "Penguins EDA"
 ---
 
-```         
-## Penguin Size and Mass by Sex and Species
-```
+## Import Libraries
 
 ```{r}
 #| warning: false
@@ -16,16 +14,13 @@ library(DBI)
 library(duckdb)
 ```
 
-\
+## Database Initialization and Connection
 
 ```{r}
 #con <- DBI::dbConnect(duckdb::duckdb(), dbdir = "my-db.duckdb")
 #DBI::dbWriteTable(con, "penguins", palmerpenguins::penguins)
 #DBI::dbDisconnect(con)
 ```
-
-\
-\
 
 ```{r}
 con <- DBI::dbConnect(
@@ -34,6 +29,8 @@ con <- DBI::dbConnect(
   )
 df <- dplyr::tbl(con, "penguins")
 ```
+
+## Set up Dataframe
 
 ```{r}
 df %>%
@@ -48,9 +45,7 @@ df %>%
   knitr::kable()
 ```
 
-```         
-## Penguin Size vs Mass by Species
-```
+## EDA Plot
 
 ```{r}
 df %>%
@@ -58,6 +53,8 @@ df %>%
   geom_point() + 
   geom_smooth(method = "lm")
 ```
+
+## Database Disconnect
 
 ```{r}
 DBI::dbDisconnect(con, shutdown = T)
