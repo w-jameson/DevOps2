@@ -4,14 +4,14 @@
     "href": "model.html",
     "title": "Model",
     "section": "",
-    "text": "from palmerpenguins import penguins\nfrom pandas import get_dummies\nimport duckdb\nimport numpy as np\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.linear_model import Ridge\nfrom sklearn import linear_model\nfrom sklearn import preprocessing\nfrom sklearn.model_selection import train_test_split"
+    "text": "from palmerpenguins import penguins\nfrom pandas import get_dummies\nimport duckdb\nimport numpy as np\nfrom sklearn import linear_model\nfrom sklearn import preprocessing\n\nfrom sklearn.model_selection import train_test_split, GridSearchCV\nfrom sklearn.linear_model import LinearRegression, Ridge, Lasso\nfrom sklearn.tree import DecisionTreeRegressor\nfrom sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor\nfrom sklearn.metrics import mean_squared_error, make_scorer"
   },
   {
     "objectID": "model.html#import-packages",
     "href": "model.html#import-packages",
     "title": "Model",
     "section": "",
-    "text": "from palmerpenguins import penguins\nfrom pandas import get_dummies\nimport duckdb\nimport numpy as np\nfrom sklearn.linear_model import LinearRegression\nfrom sklearn.ensemble import RandomForestRegressor\nfrom sklearn.linear_model import Ridge\nfrom sklearn import linear_model\nfrom sklearn import preprocessing\nfrom sklearn.model_selection import train_test_split"
+    "text": "from palmerpenguins import penguins\nfrom pandas import get_dummies\nimport duckdb\nimport numpy as np\nfrom sklearn import linear_model\nfrom sklearn import preprocessing\n\nfrom sklearn.model_selection import train_test_split, GridSearchCV\nfrom sklearn.linear_model import LinearRegression, Ridge, Lasso\nfrom sklearn.tree import DecisionTreeRegressor\nfrom sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor\nfrom sklearn.metrics import mean_squared_error, make_scorer"
   },
   {
     "objectID": "model.html#get-data",
@@ -25,35 +25,63 @@
     "href": "model.html#establish-predictors-and-traintest-split",
     "title": "Model",
     "section": "Establish Predictors and train/test split",
-    "text": "Establish Predictors and train/test split\n\nX = get_dummies(df[['bill_length_mm', 'species', 'sex']], drop_first = True)\ny = df['body_mass_g']\n\n\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)"
+    "text": "Establish Predictors and train/test split\nThe parameters are\n\nX = get_dummies(df[['bill_length_mm', 'species', 'sex']], drop_first = True)\ny = df['body_mass_g']\n\n\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)"
   },
   {
-    "objectID": "model.html#set-up-regression-models",
-    "href": "model.html#set-up-regression-models",
+    "objectID": "model.html#explanation-of-models-used",
+    "href": "model.html#explanation-of-models-used",
     "title": "Model",
-    "section": "Set up Regression Models",
-    "text": "Set up Regression Models\n\n# Below Establishes the models that will be tested, \n#lin_reg = LinearRegression()\n#rf_reg = RandomForestRegressor(n_estimators=100, random_state=1)\n#ridge_reg = Ridge(alpha = 1.0)\n#lasso_reg = linear_model.Lasso(alpha = 0.1)"
+    "section": "Explanation of Models Used",
+    "text": "Explanation of Models Used\nTo best predict the mass in grams of penguins using the Palmer’s Penguins Dataset, the following regression methods are used:\n\nMultiple Linear Regression\nRegression Tree\nRandom Forest\nBoosting\nRidge Regression\nLasso Regression\n\nModel performance will be compared using RMSE and the regression methods are performed using tools from the sklearn package.\nAdditionally, to determine the best performance for Random Forest, Boosting, Ridge Regression, and Lasso Regression, hyperparameter tuning will be performed and compared to the base model. Tuning will be performed using the grid search method from sklearn’s GridSearchCV. Below is the function used for scoring parameters for tuning based on RMSE values.\n\ndef rmse(y_true, y_pred):\n    return np.sqrt(mean_squared_error(y_true, y_pred))\n\nrmse_scorer = make_scorer(rmse, greater_is_better=False)  \n# Negative because GridSearchCV seeks to maximize the score\n\nThis function combined with the grid search setups tune the hyperparameters to maximize the negative RMSE- which in practices attempts to find the minimum RMSE."
   },
   {
-    "objectID": "model.html#model-training",
-    "href": "model.html#model-training",
+    "objectID": "model.html#linear-regression",
+    "href": "model.html#linear-regression",
     "title": "Model",
-    "section": "Model Training",
-    "text": "Model Training\n\n#lin_reg.fit(X_train, y_train)\n#rf_reg.fit(X_train, y_train)\n#ridge_reg.fit(X_train, y_train)\n#lasso_reg.fit(X_train, y_train)"
+    "section": "Linear Regression",
+    "text": "Linear Regression\n\nlinear_model = LinearRegression()\nlinear_model.fit(X_train, y_train)\ny_pred_linear = linear_model.predict(X_test)\nrmse_linear = np.sqrt(mean_squared_error(y_test, y_pred_linear))\nprint(f\"Linear Regression RMSE: {rmse_linear}\")\n\nLinear Regression RMSE: 290.09581312213606\n\n\nThe RMSE is calculated to be 290.096, which will be used to compare against the subsequent models."
   },
   {
-    "objectID": "model.html#make-predictions-using-models",
-    "href": "model.html#make-predictions-using-models",
+    "objectID": "model.html#decision-tree",
+    "href": "model.html#decision-tree",
     "title": "Model",
-    "section": "Make Predictions Using Models",
-    "text": "Make Predictions Using Models\n\n#y_pred_lin = lin_reg.predict(X_test)\n#y_pred_rf = rf_reg.predict(X_test)\n#y_pred_ridge = ridge_reg.predict(X_test)\n#y_pred_lasso = lasso_reg.fit(X_test)"
+    "section": "Decision Tree",
+    "text": "Decision Tree\n\ntree_model = DecisionTreeRegressor(random_state=1)\ntree_model.fit(X_train, y_train)\ny_pred_tree = tree_model.predict(X_test)\nrmse_tree = np.sqrt(mean_squared_error(y_test, y_pred_tree))\nprint(f\"Decision Tree RMSE: {rmse_tree}\")\n\nDecision Tree RMSE: 457.5074988737395\n\n\nThe calculated RMSE for this of 457.507 is significantly higher than that of the Linear Regression model, implying that it is a less accurate model overall."
   },
   {
-    "objectID": "model.html#comparing-model-rmse",
-    "href": "model.html#comparing-model-rmse",
+    "objectID": "model.html#random-forest",
+    "href": "model.html#random-forest",
     "title": "Model",
-    "section": "Comparing Model RMSE",
-    "text": "Comparing Model RMSE\n\n#print(f\"R^2 {model.score(X,y)}\")\n#print(f\"Intercept {model.intercept_}\")\n#print(f\"Columns {X.columns}\")\n#print(f\"Coefficients {model.coef_}\")\n\n\n#rmse_lin = np.sqrt(mean_squared_error(y_test, y_pred_lin))\n#rmse_rf = np.sqrt(mean_squared_error(y_test, y_pred_rf))\n\n\n#print(f'Linear Regression RMSE: {rmse_lin}')\n#print(f'Random Forest Regression RMSE: {rmse_rf}')"
+    "section": "Random Forest",
+    "text": "Random Forest\nFirst, we will look at the untuned model seen below.\n\nforest_model = RandomForestRegressor(random_state=1)\nforest_model.fit(X_train, y_train)\ny_pred_forest = forest_model.predict(X_test)\nrmse_forest = np.sqrt(mean_squared_error(y_test, y_pred_forest))\nprint(f\"Random Forest RMSE: {rmse_forest}\")\n\nRandom Forest RMSE: 381.64031610614956\n\n\nThe RMSE was calculated to be 381.634, which is an improvement over the single decision tree but falls short of Linear Regression.\nNow, we will use hyperparameter tuning to determine the best parameters to minimize RMSE and the calculated RMSE value using those parameters.\n\nparam_grid_rf = {\n    'n_estimators': [100, 200, 300],\n    'max_features': ['sqrt', 'log2'],\n    'max_depth': [None, 10, 20, 30],\n    'min_samples_split': [2, 5, 10],\n    'min_samples_leaf': [1, 2, 4]\n}\n\ngrid_rf = GridSearchCV(estimator=RandomForestRegressor(random_state=1), \n                       param_grid=param_grid_rf, \n                       cv=10, \n                       scoring=rmse_scorer, \n                       verbose=1, \n                       n_jobs=-1)\ngrid_rf.fit(X_train, y_train)\nprint(f\"Best parameters for Random Forest: {grid_rf.best_params_}\")\nprint(f\"Best RMSE for Random Forest: {-grid_rf.best_score_}\")\n\nFitting 10 folds for each of 216 candidates, totalling 2160 fits\nBest parameters for Random Forest: {'max_depth': None, 'max_features': 'sqrt', 'min_samples_leaf': 4, 'min_samples_split': 10, 'n_estimators': 300}\nBest RMSE for Random Forest: 318.42114713090405\n\n\nFrom tuning the model, the RMSE was reduced to 318.421, which is still significantly higher than that of the Linear Regression model."
+  },
+  {
+    "objectID": "model.html#boosting",
+    "href": "model.html#boosting",
+    "title": "Model",
+    "section": "Boosting",
+    "text": "Boosting\nOnce again, we will be looking at the un-tuned Boosting model as a baseline.\n\nboosting_model = GradientBoostingRegressor(random_state=1)\nboosting_model.fit(X_train, y_train)\ny_pred_boosting = boosting_model.predict(X_test)\nrmse_boosting = np.sqrt(mean_squared_error(y_test, y_pred_boosting))\nprint(f\"Boosting RMSE: {rmse_boosting}\")\n\nBoosting RMSE: 334.4818790948876\n\n\nThis gives an RMSE of 334.482, which is an improvement over the un-tuned Random Forest RMSE.\nSimilarly to Random Forest, tuning will be performed to see if model performance increases.\n\nparam_grid_gb = {\n    'n_estimators': [100, 200, 300],\n    'learning_rate': [0.01, 0.1, 0.2],\n    'subsample': [0.8, 0.9, 1.0],\n    'max_depth': [3, 4, 5]\n}\n\ngrid_gb = GridSearchCV(estimator=GradientBoostingRegressor(random_state=1), \n                       param_grid=param_grid_gb, \n                       cv=10, \n                       scoring=rmse_scorer, \n                       verbose=1, \n                       n_jobs=-1)\ngrid_gb.fit(X_train, y_train)\nprint(f\"Best parameters for Gradient Boosting: {grid_gb.best_params_}\")\nprint(f\"Best RMSE for Gradient Boosting: {-grid_gb.best_score_}\")\n\nFitting 10 folds for each of 81 candidates, totalling 810 fits\nBest parameters for Gradient Boosting: {'learning_rate': 0.01, 'max_depth': 3, 'n_estimators': 300, 'subsample': 0.9}\nBest RMSE for Gradient Boosting: 317.2670385381259\n\n\nThis gives a tuned RMSE of 317.267, which is an improvement over the un-tuned model, but still falls short of that of the linear regression model."
+  },
+  {
+    "objectID": "model.html#ridge-regression",
+    "href": "model.html#ridge-regression",
+    "title": "Model",
+    "section": "Ridge Regression",
+    "text": "Ridge Regression\nThe un-tuned Ridge Regression model is depicted below.\n\nridge_model = Ridge(random_state=1)\nridge_model.fit(X_train, y_train)\ny_pred_ridge = ridge_model.predict(X_test)\nrmse_ridge = np.sqrt(mean_squared_error(y_test, y_pred_ridge))\nprint(f\"Ridge Regression RMSE: {rmse_ridge}\")\n\nRidge Regression RMSE: 290.7129581931783\n\n\nThe RMSE for this model is 290.713, which is only slightly higher than that of Linear Regression, which makes sense considering both are built using least squares. Let’s check if the tuned model improves this.\n\nparam_grid_ridge = {\n    'alpha': [0.1, 1, 10, 100, 1000]\n}\n\ngrid_ridge = GridSearchCV(estimator=Ridge(random_state=1), \n                          param_grid=param_grid_ridge, \n                          cv=10, \n                          scoring=rmse_scorer, \n                          verbose=1)\ngrid_ridge.fit(X_train, y_train)\nprint(f\"Best parameters for Ridge: {grid_ridge.best_params_}\")\nprint(f\"Best RMSE for Ridge: {-grid_ridge.best_score_}\")\n\nFitting 10 folds for each of 5 candidates, totalling 50 fits\nBest parameters for Ridge: {'alpha': 0.1}\nBest RMSE for Ridge: 311.5601765262704\n\n\nThe RMSE of 311.560 was worse than that of the un-tuned model and substantially worse than that of Linear Regression."
+  },
+  {
+    "objectID": "model.html#lasso-regression",
+    "href": "model.html#lasso-regression",
+    "title": "Model",
+    "section": "Lasso Regression",
+    "text": "Lasso Regression\nThe un-tuned Lasso model is shown below.\n\nlasso_model = Lasso(random_state=1)\nlasso_model.fit(X_train, y_train)\ny_pred_lasso = lasso_model.predict(X_test)\nrmse_lasso = np.sqrt(mean_squared_error(y_test, y_pred_lasso))\nprint(f\"Lasso Regression RMSE: {rmse_lasso}\")\n\nLasso Regression RMSE: 290.62380428183945\n\n\nThe Lasso model performs similarly to the Ridge Regression mode, as to be expected in this scenario. The RMSE is 290.624. Tuning is conducted in the cell below.\n\nparam_grid_lasso = {\n    'alpha': [0.01, 0.1, 1, 10, 100]\n}\n\ngrid_lasso = GridSearchCV(estimator=Lasso(random_state=1, max_iter=10000), \n                          param_grid=param_grid_lasso, \n                          cv=10, \n                          scoring=rmse_scorer, \n                          verbose=1)\ngrid_lasso.fit(X_train, y_train)\nprint(f\"Best parameters for Lasso: {grid_lasso.best_params_}\")\nprint(f\"Best RMSE for Lasso: {-grid_lasso.best_score_}\")\n\nFitting 10 folds for each of 5 candidates, totalling 50 fits\nBest parameters for Lasso: {'alpha': 1}\nBest RMSE for Lasso: 311.54555738811507\n\n\nTuning the Lasso Regression model has a similar result to the tuned Ridge Model, where RMSE increases in this case to 311.546."
+  },
+  {
+    "objectID": "model.html#model-discussion",
+    "href": "model.html#model-discussion",
+    "title": "Model",
+    "section": "Model Discussion",
+    "text": "Model Discussion"
   },
   {
     "objectID": "model.html#model-selection",
@@ -67,7 +95,7 @@
     "href": "model.html#vetiver-model-and-pinning",
     "title": "Model",
     "section": "Vetiver Model and Pinning",
-    "text": "Vetiver Model and Pinning\n\nfrom vetiver import VetiverModel\nv = VetiverModel(model, model_name='penguin_model', prototype_data=X)\n\n\nfrom vetiver import VetiverAPI\napp = VetiverAPI(v, check_prototype=True)\n\n\nimport pins\nfrom vetiver import vetiver_pin_write\nboard = pins.board_folder(\"data/model\", allow_pickle_read = True)\nvetiver_pin_write(board, v)\n#board.pin_write(model, \"penguin_model\", type = \"joblib\")\n\nModel Cards provide a framework for transparent, responsible reporting. \n Use the vetiver `.qmd` Quarto template as a place to start, \n with vetiver.model_card()\nWriting pin:\nName: 'penguin_model'\nVersion: 20240416T154957Z-fdb5a"
+    "text": "Vetiver Model and Pinning\n\nfrom vetiver import VetiverModel\nv = VetiverModel(model, model_name='penguin_model', prototype_data=X)\n\n\nfrom vetiver import VetiverAPI\napp = VetiverAPI(v, check_prototype=True)\n\n\nimport pins\nfrom vetiver import vetiver_pin_write\nboard = pins.board_folder(\"data/model\", allow_pickle_read = True)\nvetiver_pin_write(board, v)\n#board.pin_write(model, \"penguin_model\", type = \"joblib\")\n\nModel Cards provide a framework for transparent, responsible reporting. \n Use the vetiver `.qmd` Quarto template as a place to start, \n with vetiver.model_card()\nWriting pin:\nName: 'penguin_model'\nVersion: 20240421T000617Z-565d5"
   },
   {
     "objectID": "model.html#running-the-site",
@@ -96,13 +124,6 @@
     "title": "Penguins EDA",
     "section": "",
     "text": "## Penguin Size and Mass by Sex and Species\n\nlibrary(palmerpenguins)\nlibrary(dplyr)\nlibrary(ggplot2)\nlibrary(dbplyr)\nlibrary(DBI)\nlibrary(duckdb)\n\n\n\n\n#con &lt;- DBI::dbConnect(duckdb::duckdb(), dbdir = \"my-db.duckdb\")\n#DBI::dbWriteTable(con, \"penguins\", palmerpenguins::penguins)\n#DBI::dbDisconnect(con)\n\n\n\n\n\ncon &lt;- DBI::dbConnect(\n  duckdb::duckdb(), \n  dbdir = \"my-db.duckdb\"\n  )\ndf &lt;- dplyr::tbl(con, \"penguins\")\n\n\ndf %&gt;%\n  group_by(species, sex) %&gt;%\n  summarise(\n    across(\n        ends_with(\"mm\") | ends_with(\"g\"),\n      \\(x) mean(x, na.rm = TRUE)\n      ),.groups = \"drop\"\n    ) %&gt;%\n  dplyr::collect() %&gt;%\n  knitr::kable()\n\n\n\n\n\n\n\n\n\n\n\n\nspecies\nsex\nbill_length_mm\nbill_depth_mm\nflipper_length_mm\nbody_mass_g\n\n\n\n\nAdelie\nNA\n37.84000\n18.32000\n185.6000\n3540.000\n\n\nAdelie\nfemale\n37.25753\n17.62192\n187.7945\n3368.836\n\n\nAdelie\nmale\n40.39041\n19.07260\n192.4110\n4043.493\n\n\nChinstrap\nfemale\n46.57353\n17.58824\n191.7353\n3527.206\n\n\nChinstrap\nmale\n51.09412\n19.25294\n199.9118\n3938.971\n\n\nGentoo\nNA\n45.62500\n14.55000\n215.7500\n4587.500\n\n\nGentoo\nfemale\n45.56379\n14.23793\n212.7069\n4679.741\n\n\nGentoo\nmale\n49.47377\n15.71803\n221.5410\n5484.836\n\n\n\n\n\n## Penguin Size vs Mass by Species\n\ndf %&gt;%\n  ggplot(aes(x = bill_length_mm, y = body_mass_g, color = species)) +\n  geom_point() + \n  geom_smooth(method = \"lm\")\n\n`geom_smooth()` using formula = 'y ~ x'\n\n\nWarning: Removed 2 rows containing non-finite outside the scale range\n(`stat_smooth()`).\n\n\nWarning: Removed 2 rows containing missing values or values outside the scale range\n(`geom_point()`).\n\n\n\n\n\n\n\n\n\n\nDBI::dbDisconnect(con, shutdown = T)"
-  },
-  {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
-    "section": "",
-    "text": "About this site\n\n1 + 1\n\n[1] 2"
   },
   {
     "objectID": "index.html",
