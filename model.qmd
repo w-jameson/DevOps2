@@ -19,6 +19,8 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error, make_scorer
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.pipeline import Pipeline
+
+import matplotlib.pyplot as plt
 ```
 
 ## Get Data
@@ -155,8 +157,8 @@ Once again, we will be looking at the un-tuned Boosting model as a baseline.
 boosting_model = GradientBoostingRegressor(random_state=1)
 boosting_model.fit(X_train, y_train)
 y_pred_boosting = boosting_model.predict(X_test)
-boost_rmse = np.sqrt(mean_squared_error(y_test, y_pred_boosting))
-print(f"Boosting RMSE: {boost_rmse}")
+boost_untuned_rmse = np.sqrt(mean_squared_error(y_test, y_pred_boosting))
+print(f"Boosting RMSE: {boost_untuned_rmse}")
 ```
 
 This gives an RMSE of 334.482, which is an improvement over the un-tuned Random Forest RMSE.
@@ -330,6 +332,57 @@ The tuned model here performs worse than the un-tuned model, and almost exactly 
 ## Model Comparison
 
 The test RMSE for each model is seen in the graph below.
+
+```{python}
+#Setup list of calculated rmse from each model
+rmse_values = [linear_rmse, decision_tree_rmse,rf_untuned_rmse,rf_tuned_rmse,boost_untuned_rmse, boost_tuned_rmse, ridge_untuned_rmse, ridge_tuned_rmse, lasso_untuned_rmse, lasso_tuned_rmse, poly_untuned_rmse, poly_tuned_rmse]
+
+# Corresponding model names
+models = [
+    'Linear', 
+    'Decision Tree', 
+    'RF (Untuned)', 
+    'RF (Tuned)', 
+    'Boost (Untuned)', 
+    'Boost (Tuned)', 
+    'Ridge (Untuned)', 
+    'Ridge (Tuned)', 
+    'Lasso (Untuned)', 
+    'Lasso (Tuned)', 
+    'Poly (Untuned)', 
+    'Poly (Tuned)'
+]
+
+# Color mapping by model type
+colors = [
+    'gray',        # Linear
+    'lightblue',   # Decision Tree
+    'blue', 'blue',        # RF (Untuned, Tuned)
+    'green', 'green',      # Boost (Untuned, Tuned)
+    'red', 'red',          # Ridge (Untuned, Tuned)
+    'purple', 'purple',    # Lasso (Untuned, Tuned)
+    'orange', 'orange'     # Poly (Untuned, Tuned)
+]
+
+# Creating the horizontal bar chart
+plt.figure(figsize=(8, 6))  # Adjust figure size for better display
+bars = plt.barh(models, rmse_values, color=colors)  # Create a horizontal bar chart with colored bars
+
+plt.xlabel('Test RMSE')  # Label on X-axis
+plt.title('Comparison of Model RMSEs')  # Title of the plot
+plt.xlim([0, max(rmse_values) + 1])  # Set the limit for X-axis to accommodate labels
+
+# Adding text labels on the bars
+for bar in bars:
+    label_position = bar.get_width() - 0.05 * max(rmse_values)  # Adjust label position to the left of the bar's end if necessary
+    plt.text(label_position, bar.get_y() + bar.get_height()/2, 
+             f'{bar.get_width():.2f}',  # Format the RMSE value to 2 decimal places
+             va='center', ha='right', color='white')  # Horizontal align right, change text color for visibility
+
+plt.tight_layout()  # Adjust layout to make room for label
+plt.show()  # Display the plot
+
+```
 
 ## 
 
