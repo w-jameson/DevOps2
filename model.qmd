@@ -20,7 +20,7 @@ from sklearn.metrics import mean_squared_error, make_scorer
 from sklearn.preprocessing import PolynomialFeatures, StandardScaler
 from sklearn.pipeline import Pipeline
 
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 ```
 
 ## Get Data
@@ -275,17 +275,17 @@ Now, we will perform un-tuned polynomial regression using degree 2 as a baseline
 
 ```{python}
 # Create a pipeline that includes polynomial feature creation, scaling, and Linear Regression
-pipeline = Pipeline([
+poly_untuned_pipeline = Pipeline([
     ('poly', PolynomialFeatures(degree=2)),  # Generates polynomial and interaction features up to the second degree
     ('scaler', StandardScaler()),            # Standardizes the features
     ('linear', LinearRegression())           # Applies Linear Regression
 ])
 
 # Fit the pipeline on the training data
-pipeline.fit(X_train, y_train)
+poly_untuned_pipeline.fit(X_train, y_train)
 
 # Use the trained pipeline to make predictions on the test set
-y_pred = pipeline.predict(X_test)
+y_pred = poly_untuned_pipeline.predict(X_test)
 
 # Calculate the Root Mean Squared Error (RMSE) for the predictions
 poly_untuned_rmse = np.sqrt(mean_squared_error(y_test, y_pred))
@@ -329,28 +329,67 @@ print(f"Test RMSE: {poly_tuned_rmse}")
 
 The tuned model here performs worse than the un-tuned model, and almost exactly the same as the first Linear Regression model with a test RMSE of 290.096.
 
-## Model Comparison
+## Model Comparison and Selection
 
 The test RMSE for each model is seen in the graph below.
 
-## 
-
-## Model Selection
-
 ```{python}
-model = LinearRegression()
+#Setup list of calculated rmse from each model
+rmse_values = [linear_rmse, decision_tree_rmse,rf_untuned_rmse,rf_tuned_rmse,boost_untuned_rmse, boost_tuned_rmse, ridge_untuned_rmse, ridge_tuned_rmse, lasso_untuned_rmse, lasso_tuned_rmse, poly_untuned_rmse, poly_tuned_rmse]
 
-# Step 2: Fit the model to the data
-model.fit(X, y)
+# Corresponding model names
+models = [
+    'Linear', 
+    'Decision Tree', 
+    'RF (Untuned)', 
+    'RF (Tuned)', 
+    'Boost (Untuned)', 
+    'Boost (Tuned)', 
+    'Ridge (Untuned)', 
+    'Ridge (Tuned)', 
+    'Lasso (Untuned)', 
+    'Lasso (Tuned)', 
+    'Poly (Untuned)', 
+    'Poly (Tuned)'
+]
+
+# Color mapping by model type
+colors = [
+    'gray',        # Linear
+    'lightblue',   # Decision Tree
+    'blue', 'blue',        # RF (Untuned, Tuned)
+    'green', 'green',      # Boost (Untuned, Tuned)
+    'red', 'red',          # Ridge (Untuned, Tuned)
+    'purple', 'purple',    # Lasso (Untuned, Tuned)
+    'orange', 'orange'     # Poly (Untuned, Tuned)
+]
+
+# Creating the horizontal bar chart
+plt.figure(figsize=(8, 6))  # Adjust figure size for better display
+bars = plt.barh(models, rmse_values, color=colors)  # Create a horizontal bar chart with colored bars
+
+plt.xlabel('Test RMSE')  # Label on X-axis
+plt.title('Comparison of Model RMSEs')  # Title of the plot
+plt.xlim([0, max(rmse_values) + 1])  # Set the limit for X-axis to accommodate labels
+
+# Adding text labels on the bars
+for bar in bars:
+    label_position = bar.get_width() - 0.05 * max(rmse_values)  # Adjust label position to the left of the bar's end if necessary
+    plt.text(label_position, bar.get_y() + bar.get_height()/2, 
+             f'{bar.get_width():.2f}',  # Format the RMSE value to 2 decimal places
+             va='center', ha='right', color='white')  # Horizontal align right, change text color for visibility
+
+plt.tight_layout()  # Adjust layout to make room for label
+plt.show()  # Display the plot
 ```
 
-\
+From this, we can see that the best model is the un-tuned Polynomial Regression Model, which will be used below for Vetiver model pinning.\
 
 ## Vetiver Model and Pinning
 
 ```{python}
 from vetiver import VetiverModel
-v = VetiverModel(model, model_name='penguin_model', prototype_data=X)
+v = VetiverModel(poly_untuned_pipeline, model_name='penguin_model', prototype_data=X)
 ```
 
 ```{python}
