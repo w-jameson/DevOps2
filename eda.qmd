@@ -48,6 +48,7 @@ df %>%
 ## EDA Plot
 
 ```{r}
+#| warning: false
 df %>%
   ggplot(aes(x = bill_length_mm, y = body_mass_g, color = species)) +
   geom_point() + 
