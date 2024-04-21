@@ -17,7 +17,8 @@ from sklearn.linear_model import LinearRegression, Ridge, Lasso
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.metrics import mean_squared_error, make_scorer
-
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+from sklearn.pipeline import Pipeline
 ```
 
 ## Get Data
@@ -36,7 +37,7 @@ df = con.execute("SELECT * FROM penguins").fetchdf().dropna()
 
 ## Establish Predictors and train/test split
 
-The parameters are
+The parameters for the model are bill_length_mm, species, and sex, with the model trying to predict the body_mass_g, or mass in grams for the penguin based on the parameters.
 
 ```{python}
 X = get_dummies(df[['bill_length_mm', 'species', 'sex']], drop_first = True)
@@ -46,7 +47,7 @@ y = df['body_mass_g']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
 ```
 
-## Explanation of Models Used
+## Models Overview
 
 To best predict the mass in grams of penguins using the Palmer's Penguins Dataset, the following regression methods are used:
 
@@ -62,9 +63,11 @@ To best predict the mass in grams of penguins using the Palmer's Penguins Datase
 
 -   Lasso Regression
 
+-   Polynomial Regression
+
 Model performance will be compared using RMSE and the regression methods are performed using tools from the sklearn package.
 
-Additionally, to determine the best performance for Random Forest, Boosting, Ridge Regression, and Lasso Regression, hyperparameter tuning will be performed and compared to the base model. Tuning will be performed using the grid search method from sklearn's GridSearchCV. Below is the function used for scoring parameters for tuning based on RMSE values.
+Additionally, to determine the best performance for Random Forest, Boosting, Ridge Regression, Lasso Regression, and Polynomial Regression, hyperparameter tuning will be performed and compared to the base model. Tuning will be performed using the grid search method from sklearn's GridSearchCV. Below is the function used for scoring parameters for tuning based on RMSE values.
 
 ```{python}
 def rmse(y_true, y_pred):
@@ -82,8 +85,8 @@ This function combined with the grid search setups tune the hyperparameters to m
 linear_model = LinearRegression()
 linear_model.fit(X_train, y_train)
 y_pred_linear = linear_model.predict(X_test)
-rmse_linear = np.sqrt(mean_squared_error(y_test, y_pred_linear))
-print(f"Linear Regression RMSE: {rmse_linear}")
+linear_rmse = np.sqrt(mean_squared_error(y_test, y_pred_linear))
+print(f"Linear Regression RMSE: {linear_rmse}")
 ```
 
 The RMSE is calculated to be 290.096, which will be used to compare against the subsequent models.
@@ -94,22 +97,22 @@ The RMSE is calculated to be 290.096, which will be used to compare against the 
 tree_model = DecisionTreeRegressor(random_state=1)
 tree_model.fit(X_train, y_train)
 y_pred_tree = tree_model.predict(X_test)
-rmse_tree = np.sqrt(mean_squared_error(y_test, y_pred_tree))
-print(f"Decision Tree RMSE: {rmse_tree}")
+decision_tree_rmse = np.sqrt(mean_squared_error(y_test, y_pred_tree))
+print(f"Decision Tree RMSE: {decision_tree_rmse}")
 ```
 
 The calculated RMSE for this of 457.507 is significantly higher than that of the Linear Regression model, implying that it is a less accurate model overall.
 
 ## Random Forest
 
-First, we will look at the untuned model seen below.
+First, we will look at the un-tuned model seen below.
 
 ```{python}
 forest_model = RandomForestRegressor(random_state=1)
 forest_model.fit(X_train, y_train)
 y_pred_forest = forest_model.predict(X_test)
-rmse_forest = np.sqrt(mean_squared_error(y_test, y_pred_forest))
-print(f"Random Forest RMSE: {rmse_forest}")
+rf_untuned_rmse = np.sqrt(mean_squared_error(y_test, y_pred_forest))
+print(f"Random Forest RMSE: {rf_untuned_rmse}")
 ```
 
 The RMSE was calculated to be 381.634, which is an improvement over the single decision tree but falls short of Linear Regression.
@@ -117,27 +120,32 @@ The RMSE was calculated to be 381.634, which is an improvement over the single d
 Now, we will use hyperparameter tuning to determine the best parameters to minimize RMSE and the calculated RMSE value using those parameters.
 
 ```{python}
+# Setup the parameter grid
 param_grid_rf = {
-    'n_estimators': [100, 200, 300],
+    'n_estimators': [100, 200],
     'max_features': ['sqrt', 'log2'],
-    'max_depth': [None, 10, 20, 30],
-    'min_samples_split': [2, 5, 10],
+    'max_depth': [None, 10, 20],
+    'min_samples_split': [2, 5],
     'min_samples_leaf': [1, 2, 4]
 }
 
+# Grid Search to find the best parameters
 grid_rf = GridSearchCV(estimator=RandomForestRegressor(random_state=1), 
                        param_grid=param_grid_rf, 
-                       cv=10, 
                        scoring=rmse_scorer, 
-                       verbose=1, 
-                       n_jobs=-1)
+                       cv=10, 
+                       verbose=1)
 grid_rf.fit(X_train, y_train)
+
+# Evaluate on test data
+y_pred_rf = grid_rf.predict(X_test)
+rf_tuned_rmse = np.sqrt(mean_squared_error(y_test, y_pred_rf))
 print(f"Best parameters for Random Forest: {grid_rf.best_params_}")
-print(f"Best RMSE for Random Forest: {-grid_rf.best_score_}")
+print(f"Test RMSE for Random Forest: {rf_tuned_rmse}")
 
 ```
 
-From tuning the model, the RMSE was reduced to 318.421, which is still significantly higher than that of the Linear Regression model.
+From tuning the model, the test RMSE was reduced to 311.027, which is still significantly higher than that of the Linear Regression model.
 
 ## Boosting
 
@@ -147,8 +155,8 @@ Once again, we will be looking at the un-tuned Boosting model as a baseline.
 boosting_model = GradientBoostingRegressor(random_state=1)
 boosting_model.fit(X_train, y_train)
 y_pred_boosting = boosting_model.predict(X_test)
-rmse_boosting = np.sqrt(mean_squared_error(y_test, y_pred_boosting))
-print(f"Boosting RMSE: {rmse_boosting}")
+boost_rmse = np.sqrt(mean_squared_error(y_test, y_pred_boosting))
+print(f"Boosting RMSE: {boost_rmse}")
 ```
 
 This gives an RMSE of 334.482, which is an improvement over the un-tuned Random Forest RMSE.
@@ -156,25 +164,30 @@ This gives an RMSE of 334.482, which is an improvement over the un-tuned Random 
 Similarly to Random Forest, tuning will be performed to see if model performance increases.
 
 ```{python}
+# Setup the parameter grid
 param_grid_gb = {
-    'n_estimators': [100, 200, 300],
+    'n_estimators': [100, 200],
     'learning_rate': [0.01, 0.1, 0.2],
-    'subsample': [0.8, 0.9, 1.0],
+    'subsample': [0.8, 1.0],
     'max_depth': [3, 4, 5]
 }
 
+# Grid Search to find the best parameters
 grid_gb = GridSearchCV(estimator=GradientBoostingRegressor(random_state=1), 
                        param_grid=param_grid_gb, 
-                       cv=10, 
                        scoring=rmse_scorer, 
-                       verbose=1, 
-                       n_jobs=-1)
+                       cv=10, 
+                       verbose=1)
 grid_gb.fit(X_train, y_train)
+
+# Evaluate on test data
+y_pred_gb = grid_gb.predict(X_test)
+boost_tuned_rmse = np.sqrt(mean_squared_error(y_test, y_pred_gb))
 print(f"Best parameters for Gradient Boosting: {grid_gb.best_params_}")
-print(f"Best RMSE for Gradient Boosting: {-grid_gb.best_score_}")
+print(f"Test RMSE for Gradient Boosting: {boost_tuned_rmse}")
 ```
 
-This gives a tuned RMSE of 317.267, which is an improvement over the un-tuned model, but still falls short of that of the linear regression model.
+This gives a tuned test RMSE of 331.127, which is an improvement over the un-tuned model, but still falls well short of that of the linear regression model.
 
 ## Ridge Regression
 
@@ -184,28 +197,36 @@ The un-tuned Ridge Regression model is depicted below.
 ridge_model = Ridge(random_state=1)
 ridge_model.fit(X_train, y_train)
 y_pred_ridge = ridge_model.predict(X_test)
-rmse_ridge = np.sqrt(mean_squared_error(y_test, y_pred_ridge))
-print(f"Ridge Regression RMSE: {rmse_ridge}")
+ridge_untuned_rmse = np.sqrt(mean_squared_error(y_test, y_pred_ridge))
+print(f"Ridge Regression RMSE: {ridge_untuned_rmse}")
 ```
 
 The RMSE for this model is 290.713, which is only slightly higher than that of Linear Regression, which makes sense considering both are built using least squares. Let's check if the tuned model improves this.
 
 ```{python}
+# Define the pipeline
+ridge_pipeline = Pipeline([
+    ('scaler', StandardScaler()),
+    ('ridge', Ridge())
+])
+
+# Setup the parameter grid
 param_grid_ridge = {
-    'alpha': [0.1, 1, 10, 100, 1000]
+    'ridge__alpha': [0.01, 0.1, 1, 10, 100]
 }
 
-grid_ridge = GridSearchCV(estimator=Ridge(random_state=1), 
-                          param_grid=param_grid_ridge, 
-                          cv=10, 
-                          scoring=rmse_scorer, 
-                          verbose=1)
+# Grid Search to find the best parameters
+grid_ridge = GridSearchCV(ridge_pipeline, param_grid_ridge, cv=10, scoring=rmse_scorer, verbose=1)
 grid_ridge.fit(X_train, y_train)
+
+# Evaluate on test data
+y_pred_ridge = grid_ridge.predict(X_test)
+ridge_tuned_rmse = np.sqrt(mean_squared_error(y_test, y_pred_ridge))
 print(f"Best parameters for Ridge: {grid_ridge.best_params_}")
-print(f"Best RMSE for Ridge: {-grid_ridge.best_score_}")
+print(f"Test RMSE for Ridge: {ridge_tuned_rmse}")
 ```
 
-The RMSE of 311.560 was worse than that of the un-tuned model and substantially worse than that of Linear Regression.
+The test RMSE of 290.233 was marginally better than that of the un-tuned model and still slightly worse than Linear Regression but with additionally model complexity.
 
 ## Lasso Regression
 
@@ -215,31 +236,100 @@ The un-tuned Lasso model is shown below.
 lasso_model = Lasso(random_state=1)
 lasso_model.fit(X_train, y_train)
 y_pred_lasso = lasso_model.predict(X_test)
-rmse_lasso = np.sqrt(mean_squared_error(y_test, y_pred_lasso))
-print(f"Lasso Regression RMSE: {rmse_lasso}")
+lasso_untuned_rmse = np.sqrt(mean_squared_error(y_test, y_pred_lasso))
+print(f"Lasso Regression RMSE: {lasso_untuned_rmse}")
 ```
 
 The Lasso model performs similarly to the Ridge Regression mode, as to be expected in this scenario. The RMSE is 290.624. Tuning is conducted in the cell below.
 
 ```{python}
+# Define the pipeline
+lasso_pipeline = Pipeline([
+    ('scaler', StandardScaler()),
+    ('lasso', Lasso(max_iter=10000))
+])
+
+# Setup the parameter grid
 param_grid_lasso = {
-    'alpha': [0.01, 0.1, 1, 10, 100]
+    'lasso__alpha': [0.01, 0.1, 1, 10, 100]
 }
 
-grid_lasso = GridSearchCV(estimator=Lasso(random_state=1, max_iter=10000), 
-                          param_grid=param_grid_lasso, 
-                          cv=10, 
-                          scoring=rmse_scorer, 
-                          verbose=1)
+# Grid Search to find the best parameters
+grid_lasso = GridSearchCV(lasso_pipeline, param_grid_lasso, cv=10, scoring=rmse_scorer, verbose=1)
 grid_lasso.fit(X_train, y_train)
-print(f"Best parameters for Lasso: {grid_lasso.best_params_}")
-print(f"Best RMSE for Lasso: {-grid_lasso.best_score_}")
 
+# Evaluate on test data
+y_pred_lasso = grid_lasso.predict(X_test)
+lasso_tuned_rmse = np.sqrt(mean_squared_error(y_test, y_pred_lasso))
+print(f"Best parameters for Lasso: {grid_lasso.best_params_}")
+print(f"Test RMSE for Lasso: {lasso_tuned_rmse}")
 ```
 
-Tuning the Lasso Regression model has a similar result to the tuned Ridge Model, where RMSE increases in this case to 311.546.
+Tuning the Lasso Regression model has little effect on the test RMSE, decreasing slightly to 290.464, which is still slightly higher than that of Linear Regression.
 
-## Model Discussion
+## Polynomial Regression
+
+Now, we will perform un-tuned polynomial regression using degree 2 as a baseline.
+
+```{python}
+# Create a pipeline that includes polynomial feature creation, scaling, and Linear Regression
+pipeline = Pipeline([
+    ('poly', PolynomialFeatures(degree=2)),  # Generates polynomial and interaction features up to the second degree
+    ('scaler', StandardScaler()),            # Standardizes the features
+    ('linear', LinearRegression())           # Applies Linear Regression
+])
+
+# Fit the pipeline on the training data
+pipeline.fit(X_train, y_train)
+
+# Use the trained pipeline to make predictions on the test set
+y_pred = pipeline.predict(X_test)
+
+# Calculate the Root Mean Squared Error (RMSE) for the predictions
+poly_untuned_rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+print(f"RMSE: {poly_untuned_rmse}")
+```
+
+The test RMSE of 279.156 is the first improvement on the original Linear Regression test RMSE. Tuning of the Polynomial Model is shown below.
+
+```{python}
+
+# Define a pipeline that includes polynomial feature creation, scaling, and Linear Regression
+pipeline = Pipeline([
+    ('poly', PolynomialFeatures()),
+    ('scaler', StandardScaler()),
+    ('linear', LinearRegression())
+])
+
+# Define the parameter grid to tune the polynomial degrees
+param_grid = {
+    'poly__degree': [1, 2, 3, 4, 5, 6, 7, 8]  # Testing polynomial degrees from 1 to 5
+}
+
+# Create a GridSearchCV object to tune the degrees
+grid_search = GridSearchCV(pipeline, param_grid, cv=10, scoring='neg_root_mean_squared_error', verbose=1)
+
+# Fit the GridSearchCV object to the training data
+grid_search.fit(X_train, y_train)
+
+# Finding the best polynomial degree and corresponding model
+best_degree = grid_search.best_params_['poly__degree']
+best_model = grid_search.best_estimator_
+
+# Use the best model to make predictions on the test set
+y_pred = best_model.predict(X_test)
+
+# Calculate the Root Mean Squared Error (RMSE) for the predictions on the test set
+poly_tuned_rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+print(f"Best polynomial degree: {best_degree}")
+print(f"Test RMSE: {poly_tuned_rmse}")
+```
+
+The tuned model here performs worse than the un-tuned model, and almost exactly the same as the first Linear Regression model with a test RMSE of 290.096.
+
+## Model Comparison
+
+The test RMSE for each model is seen in the graph below.
 
 ## 
 
@@ -252,11 +342,6 @@ model = LinearRegression()
 model.fit(X, y)
 ```
 
-```{python}
-model1 = "best model"
-```
-
-\
 \
 
 ## Vetiver Model and Pinning
